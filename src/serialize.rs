@@ -28,7 +28,7 @@ impl<'de> Deserialize<'de> for XorName {
     {
         if deserializer.is_human_readable() {
             struct XorNameHexStrVisitor;
-            impl<'de> Visitor<'de> for XorNameHexStrVisitor {
+            impl Visitor<'_> for XorNameHexStrVisitor {
                 type Value = XorName;
 
                 fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -78,7 +78,7 @@ impl<'de> Deserialize<'de> for Prefix {
     {
         if deserializer.is_human_readable() {
             struct PrefixVisitor;
-            impl<'de> Visitor<'de> for PrefixVisitor {
+            impl Visitor<'_> for PrefixVisitor {
                 type Value = Prefix;
 
                 fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

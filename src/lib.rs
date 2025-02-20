@@ -47,7 +47,6 @@
     unused_results
 )]
 #![allow(
-    box_pointers,
     missing_copy_implementations,
     missing_debug_implementations,
     variant_size_differences
@@ -57,6 +56,7 @@ use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 pub use rand;
 use rand::distributions::{Distribution, Standard};
+use std::convert::TryInto;
 use tiny_keccak::{Hasher, Sha3};
 
 /// Creates XorName with the given leading bytes and the rest filled with zeroes.
@@ -213,6 +213,22 @@ impl XorName {
         }
         8 * XOR_NAME_LEN
     }
+
+    /// Encode the XorName as a hex string.
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.0)
+    }
+
+    /// Decode a hex string into a XorName.
+    pub fn from_hex(hex: &str) -> Result<Self, hex::FromHexError> {
+        let bytes = hex::decode(hex)?;
+        let xor = XorName(
+            bytes
+                .try_into()
+                .map_err(|_| hex::FromHexError::InvalidStringLength)?,
+        );
+        Ok(xor)
+    }
 }
 
 impl fmt::Debug for XorName {
@@ -333,6 +349,15 @@ mod tests {
     use super::*;
     use bincode::{deserialize, serialize};
     use rand::{rngs::SmallRng, Rng, SeedableRng};
+
+    #[test]
+    fn xor_name_from_hex() {
+        let mut rng = SmallRng::from_entropy();
+        let xorname: XorName = XorName::random(&mut rng);
+        let hex = xorname.to_hex();
+        let xorname_from_hex = XorName::from_hex(&hex).unwrap();
+        assert_eq!(xorname, xorname_from_hex);
+    }
 
     #[test]
     fn create_random_xorname() {
